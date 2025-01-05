@@ -13,15 +13,16 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    UserModule,
-    PostModule,
-    InterestModule,
     TypeOrmModule.forRootAsync({
       useFactory: () => {
         const ormConfig: TypeOrmModuleOptions = JSON.parse(
           readFileSync(`${__dirname}/../ormconfig.json`, { encoding: 'utf-8' }),
         );
-        return ormConfig;
+        return {
+          ...ormConfig,
+          entities: [`${__dirname}/**/*.entity{.ts,.js}`],
+          migrations: [`${__dirname}/migration/*.{ts,js}`],
+        };
       },
       async dataSourceFactory(options) {
         if (!options) {
@@ -31,6 +32,9 @@ import { AuthModule } from './auth/auth.module';
         return addTransactionalDataSource(new DataSource(options));
       },
     }),
+    UserModule,
+    PostModule,
+    InterestModule,
     AuthModule,
   ],
   controllers: [AppController, AuthController],
